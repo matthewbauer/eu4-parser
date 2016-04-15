@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
-
 module GeoJSON where
-
 import Control.Applicative
 import Control.Monad
 import Data.Aeson
 
 type Position = [Double]
 
-data Geomeetry = Point Position
+data Geometry = Point Position
               | MultiPoint [Position]
               | LineString [Position]
               | MultiLineString [Position]
