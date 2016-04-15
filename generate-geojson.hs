@@ -28,10 +28,11 @@ provincePoints provinces definition =
 isGoodProvince (_, points) = (length points < 500) && (length points > 0)
 
 provinceFeature ((i,r,g,b,name), points) = Feature
-  (GeometryCollection [LineString (points ++ [head points])])
+  (GeometryCollection [Polygon ([points ++ [head points]])])
   (show i)
   (object [
-    (Data.Text.pack "name") .= tostr name
+    (Data.Text.pack "name") .= tostr name,
+    (Data.Text.pack "color") .= [r,g,b]
   ])
   where tostr = String . Data.Text.pack . (map (chr . fromIntegral)) . unpack
 
