@@ -5,27 +5,43 @@ import Data.Vector (toList)
 import Data.Aeson
 import qualified Data.Text
 import Data.Char
+import qualified Data.ByteString.Lazy
 import Data.ByteString.Lazy (unpack)
+import Codec.BMP
 
-provincePoints provinces = fmap $ usefulPoints provinces
+import Data.Vector ((!),Vector)
+import Data.Word
+import Data.ByteString.Lazy (ByteString)
 
-usefulPoints provinces = filter
-  (not . (isNotMeaningfulPixel $ pixel provinces)) . findPoints provinces
+-- usefulPoints :: BMP -> [(Int,Int)]
+usefulPoints provinces = (filter
+  (not . (isNotMeaningfulPixel (pixel provinces)))) .
+  findPoints provinces
 
-provinceGeometry provinces definition = GeometryCollection [LineString (points ++ [head points])]
-  where points = fmap toPoint (usefulPoints provinces definition)
-        toPoint (x,y) = [fromIntegral x, fromIntegral y]
+findPoints ps p = loopPointsOnce (pixel ps) $ head startPoints
+  where startPoints = lookupProvince p ps
 
-bytesToString = map (chr . fromIntegral)
+provincePoints provinces definition =
+    (definition, take 500 (fmap toPoint (usefulPoints provinces definition)))
+  where toPoint (x,y) = [fromIntegral x, fromIntegral y]
 
-provinceFeature provinces (i,r,g,b,name) = Feature
-  (provinceGeometry provinces (i,r,g,b,name))
+isGoodProvince (_, points) = (length points < 500) && (length points > 0)
+
+provinceFeature ((i,r,g,b,name), points) = Feature
+  (GeometryCollection [LineString (points ++ [head points])])
   (show i)
-  (object [ (Data.Text.pack "name") .= String (Data.Text.pack (bytesToString (unpack name))) ])
+  (object [
+    (Data.Text.pack "name") .= tostr name
+  ])
+  where tostr = String . Data.Text.pack . (map (chr . fromIntegral)) . unpack
 
+feature definitions provinces = fmap provinceFeature $
+  filter isGoodProvince $ fmap (provincePoints provinces) (toList definitions)
+
+-- geojson :: IO (FeatureCollection)
 geojson = do
   definitions <- definitions
   provinces <- provinces
-  return $ FeatureCollection $ fmap (provinceFeature provinces) (toList definitions)
+  return $ FeatureCollection $ feature definitions provinces
 
-main = (print . encode) =<< geojson
+main = (Data.ByteString.Lazy.writeFile "out.json") . encode =<< geojson

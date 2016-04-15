@@ -15,9 +15,6 @@ filterPixels bmp = filterPixels' (unpackBMPToRGBA32 bmp) $ bmpDimensions bmp
 
 lookupProvince (_, r, g, b, _) ps = filterPixels ps (r, g, b)
 
-findPoints ps p = loopPointsOnce (pixel ps) $ head startPoints
-  where startPoints = lookupProvince p ps
-
 neighbors (x, y) = [ (x-1, y-1), (x, y-1), (x+1, y-1),
                      (x-1, y),             (x+1, y),
                      (x-1, y+1), (x, y+1), (x+1, y+1) ]
