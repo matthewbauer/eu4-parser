@@ -560,4 +560,56 @@ followBorders
   [True, True, True,
    True,       False,
    False,False,True] = (1,1)
+followBorders
+  [False,True,False,
+   False,     True,
+   False,True,False] = (0,-1)
+followBorders
+  [True,False,True,
+   True,      True,
+   False,True,True] = (1,-1)
+followBorders
+  [True, True, False,
+   False,      True,
+   False,False,True] = (-1,-1)
+followBorders
+  [False,False,False,
+   True,       False,
+   False,False,False] = (-1,0)
+followBorders
+  [False,True,True,
+   True,      False,
+   True,True, False] = (0,-1)
+followBorders
+  [False,True,False,
+   True,      True,
+   True,False,False] = (-1,1)
+followBorders
+  [True,True, False,
+   True,      False,
+   True,False,True] = (-1,1)
+followBorders
+  [False,True,False,
+   False,     True,
+   True, True,False] = (0,-1)
+followBorders
+  [True,False,True,
+   False,     True,
+   False,True,True] = (-1,-1)
+followBorders
+  [False,True, False,
+   False,      False,
+   False,False,False] = (0,-1)
+followBorders
+  [True, True,True,
+   False,     False,
+   False,True,True] = (-1,-1)
+followBorders
+  [True,False,True,
+   True,      False,
+   True,True, True] = (1,1)
+followBorders
+  [False,True,False,
+   False,     False,
+   False,True,True] = (0,-1)
 followBorders b = (0,0)
