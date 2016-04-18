@@ -18,7 +18,9 @@ usefulPoints provinces = (filter
   (not . (isNotMeaningfulPixel (pixel provinces)))) .
   findPoints provinces
 
-findPoints ps p = loopPointsOnce (pixel ps) $ head startPoints
+findPoints ps p = if length startPoints == 0
+    then []
+    else loopPointsOnce (pixel ps) $ head startPoints
   where startPoints = lookupProvince p ps
 
 provincePoints provinces definition =
