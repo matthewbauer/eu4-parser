@@ -4,6 +4,8 @@ module ClausewitzText where
 import Text.Parsec
 import Text.Parsec.String
 
+import Data.Functor.Identity (Identity)
+
 -- underlying value piece in all text files
 data Value = String String
            | Float Float
@@ -16,7 +18,10 @@ data Value = String String
            | Undefined
            deriving Show
 
+parser :: ParsecT [Char] u Identity [Value]
 parser = many $ try value
+
+decode :: SourceName -> [Char] -> Either ParseError [Value]
 decode = parse parser
 
 value :: GenParser Char st Value
@@ -26,44 +31,53 @@ value = do
   spaces
   return v
 
+date :: ParsecT [Char] u Identity Value
 date = do
   a <- digit `manyTill` try (char '.')
   b <- digit `manyTill` try (char '.')
   c <- many digit
   return $ Date (read a :: Integer) (read b :: Integer) (read c :: Integer)
 
+identifier :: ParsecT [Char] u Identity Value
 identifier = do
   a <- many1 $ alphaNum <|> char '_'
   return $ Identifier a
 
+float :: ParsecT [Char] u Identity Value
 float = do
   n <- many1 $ digit <|> char '.' <|> char '-'
   return $ Float (read n :: Float)
 
-bool = fmap Bool $ (try (string "yes") >> return True) <|> (try (string "no") >> return False)
+bool :: ParsecT [Char] u Identity Value
+bool = fmap Bool $ (try (string "yes") >> return True) <|>
+  (try (string "no") >> return False)
 
+string' :: ParsecT [Char] u Identity Value
 string' = do
-  char '"'
-  s <- anyChar `manyTill` try (char '"')
-  return $ String s
+  _ <- char '"'
+  s' <- anyChar `manyTill` try (char '"')
+  return $ String s'
 
+list :: ParsecT [Char] u Identity Value
 list = do
-  char '{'
+  _ <- char '{'
   spaces
   r <- many $ try value
   spaces
-  char '}'
+  _ <- char '}'
   return $ List r
 
+assignment :: ParsecT [Char] u Identity Value
 assignment = do
   i <- identifier
   spaces
-  char '='
+  _ <- char '='
   spaces
   n <- value
   return $ Assignment (s i) n
 
+comment :: ParsecT [Char] u Identity Value
 comment = do
-  char '#'
-  anyChar `manyTill` try endOfLine
+  _ <- char '#'
+  _ <- anyChar `manyTill` try endOfLine
   return Comment

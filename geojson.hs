@@ -1,7 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module GeoJSON where
-import Control.Applicative
-import Control.Monad
+module Geojson where
 import Data.Aeson
 
 type Position = [Double]

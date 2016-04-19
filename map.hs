@@ -8,17 +8,19 @@ import qualified Data.Csv
 import qualified Data.ByteString.Lazy
 import Data.ByteString.Lazy (ByteString)
 import Data.ByteString (index)
+import qualified Data.ByteString.Internal
 
-import Data.Vector ((!),Vector)
+import Data.Vector (Vector)
 import Codec.BMP
 
 readAndParse :: String -> IO [ClausewitzText.Value]
 readAndParse path = assert .
   ClausewitzText.decode path =<< readFile path
     where assert (Right v) = return v
+          assert (Left _) = return []
 
 lookup' :: String -> [ClausewitzText.Value] -> ClausewitzText.Value
-lookup' k [] = ClausewitzText.Undefined
+lookup' _ [] = ClausewitzText.Undefined
 lookup' k (x:xs) = case x of
   ClausewitzText.Assignment a b ->
     if a == k
@@ -37,10 +39,10 @@ readDefaultMapAttributeFile k = do
   ClausewitzText.String v <- lookupDefaultMap k
   readAndParse $ map_path v
 
--- readDefaultMapCSVFile :: String -> (ByteString -> ) ->
+readDefaultMapCSVFile :: String -> (ByteString -> Either t b) -> IO b
 readDefaultMapCSVFile k d = do
-  ClausewitzText.String k <- lookupDefaultMap k
-  b <- Data.ByteString.Lazy.readFile $ map_path k
+  ClausewitzText.String k' <- lookupDefaultMap k
+  b <- Data.ByteString.Lazy.readFile $ map_path k'
   let Right v = d b
   return v
 
@@ -50,48 +52,80 @@ readDefaultMapBMPFile k = do
   Right bmp <- readBMP $ map_path v
   return bmp
 
-pixel' p (width, height) (x, y)
+pixel' :: Data.ByteString.Internal.ByteString -> (Int, Int) -> (Int, Int) -> [Word8]
+pixel' p (w, h) (x, y)
   | x < 0 = [0,0,0]
   | y < 0 = [0,0,0]
-  | x >= width = [0,0,0]
-  | y >= height = [0,0,0]
-  | otherwise = pixel'' p (y * width + x)
+  | x >= w = [0,0,0]
+  | y >= h = [0,0,0]
+  | otherwise = pixel'' p (y * w + x)
   where pixel'' s n = map ((index s) . ((n * 4) +)) [0,1,2]
+
+pixel :: BMP -> (Int, Int) -> [Word8]
 pixel bmp = pixel' (unpackBMPToRGBA32 bmp) (bmpDimensions bmp)
 
 -- semicolon separated values
+ssvOptions :: Data.Csv.DecodeOptions
 ssvOptions = Data.Csv.defaultDecodeOptions {
   Data.Csv.decDelimiter = fromIntegral $ ord ';'
 }
 
+defaultMap :: IO [ClausewitzText.Value]
 defaultMap = readAndParse $ map_path "default.map"
 
+provinces :: IO BMP
 provinces = readDefaultMapBMPFile "provinces"
 -- terrain = readDefaultMapBMPFile "terrain"
 -- rivers = readDefaultMapBMPFile "rivers"
 -- heightmap = readDefaultMapBMPFile "heightmap"
 -- tree_definition = readDefaultMapBMPFile "tree_definition"
 
+area :: IO [ClausewitzText.Value]
 area = readDefaultMapAttributeFile "area"
+
+climate :: IO [ClausewitzText.Value]
 climate = readDefaultMapAttributeFile "climate"
+
+continent :: IO [ClausewitzText.Value]
 continent = readDefaultMapAttributeFile "continent"
+
+positions :: IO [ClausewitzText.Value]
 positions = readDefaultMapAttributeFile "positions"
+
+region :: IO [ClausewitzText.Value]
 region = readDefaultMapAttributeFile "region"
+
+seasons :: IO [ClausewitzText.Value]
 seasons = readDefaultMapAttributeFile "seasons"
+
+superregion :: IO [ClausewitzText.Value]
 superregion = readDefaultMapAttributeFile "superregion"
+
+trade_winds :: IO [ClausewitzText.Value]
 trade_winds = readDefaultMapAttributeFile "trade_winds"
 
+width :: IO ClausewitzText.Value
 width = lookupDefaultMap "width"
+
+height :: IO ClausewitzText.Value
 height = lookupDefaultMap "height"
+
+sea_starts :: IO ClausewitzText.Value
 sea_starts = lookupDefaultMap "sea_starts"
+
+max_provinces :: IO ClausewitzText.Value
 max_provinces = lookupDefaultMap "max_provinces"
+
+lakes :: IO ClausewitzText.Value
 lakes = lookupDefaultMap "only_used_for_random"
 
+adjacencies :: IO (Vector (Int, Int, ByteString, Int, Int, Int, Int, Int, ByteString))
 adjacencies = readDefaultMapCSVFile "adjacencies"
   (Data.Csv.decodeWith ssvOptions Data.Csv.HasHeader ::
   ByteString -> Either String
   (Vector (Int, Int, ByteString, Int, Int, Int, Int, Int, ByteString)))
 
+definitions :: IO (Vector (Int, Word8, Word8, Word8, ByteString))
 definitions = readDefaultMapCSVFile "definitions"
   (Data.Csv.decodeWith ssvOptions Data.Csv.HasHeader ::
   ByteString -> Either String (Vector (Int, Word8, Word8, Word8, ByteString)))

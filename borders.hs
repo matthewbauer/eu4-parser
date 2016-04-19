@@ -5,20 +5,24 @@ import Map
 import Data.Word
 
 -- http://stackoverflow.com/a/4119758/166289
+cartProd :: [t] -> [t1] -> [(t, t1)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]
 
 filterPixels :: BMP -> (Word8, Word8, Word8) -> [(Int, Int)]
 filterPixels bmp = filterPixels' (unpackBMPToRGBA32 bmp) $ bmpDimensions bmp
   where
-    filterPixels' s (width, height) (r, g, b) = filter (((==) [r, g, b]) .
-      (pixel' s (width, height))) $ cartProd [0..width-1] [0..height-1]
+    filterPixels' s (w, h) (r, g, b) = filter (((==) [r, g, b]) .
+      (pixel' s (w, h))) $ cartProd [0..w-1] [0..h-1]
 
+lookupProvince :: (t, Word8, Word8, Word8, t1) -> BMP -> [(Int, Int)]
 lookupProvince (_, r, g, b, _) ps = filterPixels ps (r, g, b)
 
+neighbors :: (Num t, Num t1) => (t, t1) -> [(t, t1)]
 neighbors (x, y) = [ (x-1, y-1), (x, y-1), (x+1, y-1),
                      (x-1, y),             (x+1, y),
                      (x-1, y+1), (x, y+1), (x+1, y+1) ]
 
+isNotMeaningfulPixel :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> Bool
 isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
   (p (x-1, y-1)) (p (x, y-1)) (p (x+1, y-1))
   (p (x-1, y))   (p (x, y))   (p (x+1, y))
@@ -63,14 +67,21 @@ isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
          True,  True,  True]
       ]
 
+neighborsDiff :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [Bool]
 neighborsDiff p (x, y) = fmap ((p (x, y))==) $ fmap p (neighbors (x, y))
 
+nextPoint :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> (t, t1)
 nextPoint p (x, y) = addPoints (x, y) $ followBorders (neighborsDiff p (x, y))
-  where addPoints (x, y) (a, b) = (x+a, y+b)
+  where addPoints (x', y') (a, b) = (x'+a, y'+b)
 
+loopPoints :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [(t, t1)]
 loopPoints p = iterate $ nextPoint p
+
+loopPointsOnce :: (Eq t, Eq t1, Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [(t, t1)]
 loopPointsOnce p (x, y) = takeWhile (not . ((head points)==)) $ tail points
   where points = loopPoints p (x, y)
+
+followBorders :: (Num t, Num t1) => [Bool] -> (t, t1)
 
 -- clockwise search
 followBorders
@@ -609,4 +620,4 @@ followBorders
   [False,True,False,
    False,     False,
    False,True,True] = (0,-1)
-followBorders b = (0,0)
+followBorders _ = (0,0)
