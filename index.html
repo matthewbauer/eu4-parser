@@ -1,0 +1,60 @@
+<html>
+<head>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css">
+  <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+  <script src="geojson.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var map = L.map('map', {
+      crs: L.extend({}, L.CRS, {
+        wrapLng: [0, 5632],
+        projection: L.Projection.LonLat,
+        transformation: new L.Transformation(1, 0, -1, 0),
+        scale: function(zoom) {
+          return Math.pow(2, zoom);
+        },
+        zoom: function(scale) {
+          return Math.log(scale) / Math.LN2;
+        },
+        distance: function(latlng1, latlng2) {
+          return Math.sqrt(Math.pow(latlng2.lng - latlng1.lng, 2) +
+                 Math.pow(latlng2.lat - latlng1.lat, 2));
+        }
+      }),
+      minZoom: -2,
+      maxZoom: 1
+    })
+    .fitBounds(new L.LatLngBounds(L.latLng(0,0), L.latLng(2048, 5632)));
+    L.geoJson(geojson, {
+      style: function(feature) {
+        return {
+          fillColor: '#' + feature.properties.color.map(function(i) {
+            return i.toString(16);
+          }).join(''),
+          weight: 2,
+          opacity: 1,
+          dashArray: '3',
+          fillOpacity: 1.0
+        };
+      },
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup(feature.properties.name);
+      }
+    }).addTo(map);
+  </script>
+</body>
+</html>

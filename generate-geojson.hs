@@ -13,7 +13,6 @@ import Data.Vector (Vector)
 import Data.Word
 import Data.ByteString.Lazy (ByteString)
 
--- usefulPoints :: BMP -> [(Int,Int)]
 usefulPoints :: BMP -> (t, Word8, Word8, Word8, t1) -> [(Int, Int)]
 usefulPoints provinces' = (filter
   (not . (isNotMeaningfulPixel (pixel provinces')))) .
@@ -36,7 +35,7 @@ isGoodProvince (_, points) = (length points < 500) && (length points > 0)
 provinceFeature :: (Show a, ToJSON t) => ((a, t, t, t, ByteString), [Position]) -> Feature
 provinceFeature ((i,r,g,b,name), points) = Feature
   (GeometryCollection [Polygon ([points ++ [head points]])])
-  (show i)
+  ("province" ++ show i)
   (object [
     (Data.Text.pack "name") .= tostr name,
     (Data.Text.pack "color") .= [r,g,b]
