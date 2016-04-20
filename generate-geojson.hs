@@ -1,14 +1,14 @@
 import Map
 import Borders
 import Geojson
-import Data.Vector (toList, Vector)
 import Data.Aeson
 import Data.Char
 import Data.Word
-import qualified Data.Text
-import qualified Data.ByteString.Lazy
+import Data.Vector (toList, Vector)
 import Data.ByteString.Lazy (unpack, ByteString)
 import Codec.BMP
+import qualified Data.Text
+import qualified Data.ByteString.Lazy
 
 usefulPoints :: BMP -> (t, Word8, Word8, Word8, t1) -> [(Int, Int)]
 usefulPoints provinces' = filter

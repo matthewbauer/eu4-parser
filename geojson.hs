@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Geojson where
+
 import Data.Aeson
 
 type Position = [Double]

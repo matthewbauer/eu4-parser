@@ -1,17 +1,17 @@
 module Map where
 
-import qualified ClausewitzText
 import Data.Word
 import Data.Char
+import Codec.BMP
+import Data.Vector (Vector)
+
+import qualified ClausewitzText
 import qualified Data.Csv
 
-import qualified Data.ByteString.Lazy
 import Data.ByteString.Lazy (ByteString)
 import Data.ByteString (index)
+import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Internal
-
-import Data.Vector (Vector)
-import Codec.BMP
 
 readAndParse :: String -> IO [ClausewitzText.Value]
 readAndParse path = assert .
