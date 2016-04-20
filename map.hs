@@ -75,10 +75,18 @@ defaultMap = readAndParse $ mapPath "default.map"
 
 provinces :: IO BMP
 provinces = readDefaultMapBMPFile "provinces"
--- terrain = readDefaultMapBMPFile "terrain"
--- rivers = readDefaultMapBMPFile "rivers"
--- heightmap = readDefaultMapBMPFile "heightmap"
--- tree_definition = readDefaultMapBMPFile "tree_definition"
+
+terrain :: IO BMP
+terrain = readDefaultMapBMPFile "terrain"
+
+rivers :: IO BMP
+rivers = readDefaultMapBMPFile "rivers"
+
+heightmap :: IO BMP
+heightmap = readDefaultMapBMPFile "heightmap"
+
+treeDefinition :: IO BMP
+treeDefinition = readDefaultMapBMPFile "tree_definition"
 
 area :: IO [ClausewitzText.Value]
 area = readDefaultMapAttributeFile "area"
