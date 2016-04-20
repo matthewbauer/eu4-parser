@@ -11,7 +11,7 @@ genmap (x:xs) = genmap' x `union` genmap xs
     genmap' _ = empty
     each n (y:ys) = each' n y `union` each n ys
     each _ _ = empty
-    each' n (ClausewitzText.Float b) = singleton (show $ truncate b) n
+    each' n (ClausewitzText.Float b) = singleton (show (truncate b :: Integer)) n
     each' _ _ = empty
 
 genmapS :: [ClausewitzText.Value] -> Map String String
@@ -24,7 +24,6 @@ genmapS (x:xs) = genmapS' x `union` genmapS xs
     each _ _ = empty
     each' n (ClausewitzText.String b) = singleton b n
     each' _ _ = empty
-
 
 genmapI :: [ClausewitzText.Value] -> Map String String
 genmapI [] = empty

@@ -1,4 +1,4 @@
-geojson.js
+*.js
 events
 common
 decisions
@@ -8,6 +8,4 @@ localisation
 map
 missions
 localisation
-out.json
-leaflet.js
 leaflet.css

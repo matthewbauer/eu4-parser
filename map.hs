@@ -8,14 +8,13 @@ import Data.Vector (Vector)
 import qualified ClausewitzText
 import qualified Data.Csv
 
-import Data.ByteString.Lazy (ByteString)
-import Data.ByteString (index)
-import qualified Data.ByteString.Lazy
-import qualified Data.ByteString.Internal
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Char8 as BSC
 
 readAndParse :: String -> IO [ClausewitzText.Value]
 readAndParse path = assert .
-  ClausewitzText.decode path =<< readFile path
+  ClausewitzText.decode path =<< Prelude.readFile path
     where assert (Right v) = return v
           assert (Left _) = return []
 
@@ -39,10 +38,10 @@ readDefaultMapAttributeFile k = do
   ClausewitzText.String v <- lookupDefaultMap k
   readAndParse $ mapPath v
 
-readDefaultMapCSVFile :: String -> (ByteString -> Either t b) -> IO b
+readDefaultMapCSVFile :: String -> (BSL.ByteString -> Either t b) -> IO b
 readDefaultMapCSVFile k d = do
   ClausewitzText.String k' <- lookupDefaultMap k
-  b <- Data.ByteString.Lazy.readFile $ mapPath k'
+  b <- BSL.readFile $ mapPath k'
   let Right v = d b
   return v
 
@@ -52,14 +51,14 @@ readDefaultMapBMPFile k = do
   Right bmp <- readBMP $ mapPath v
   return bmp
 
-pixel' :: Data.ByteString.Internal.ByteString -> (Int, Int) -> (Int, Int) -> [Word8]
+pixel' :: BS.ByteString -> (Int, Int) -> (Int, Int) -> [Word8]
 pixel' p (w, h) (x, y)
   | x < 0 = [0,0,0]
   | y < 0 = [0,0,0]
   | x >= w = [0,0,0]
   | y >= h = [0,0,0]
   | otherwise = pixel'' p (y * w + x)
-  where pixel'' s n = map (index s . ((n * 4) +)) [0,1,2]
+  where pixel'' s n = map (BS.index s . ((n * 4) +)) [0,1,2]
 
 pixel :: BMP -> (Int, Int) -> [Word8]
 pixel bmp = pixel' (unpackBMPToRGBA32 bmp) (bmpDimensions bmp)
@@ -127,13 +126,13 @@ maxProvinces = lookupDefaultMap "max_provinces"
 lakes :: IO ClausewitzText.Value
 lakes = lookupDefaultMap "only_used_for_random"
 
-adjacencies :: IO (Vector (Int, Int, ByteString, Int, Int, Int, Int, Int, ByteString))
+adjacencies :: IO (Vector (Int, Int, BSL.ByteString, Int, Int, Int, Int, Int, BSL.ByteString))
 adjacencies = readDefaultMapCSVFile "adjacencies"
   (Data.Csv.decodeWith ssvOptions Data.Csv.HasHeader ::
-  ByteString -> Either String
-  (Vector (Int, Int, ByteString, Int, Int, Int, Int, Int, ByteString)))
+  BSL.ByteString -> Either String
+  (Vector (Int, Int, BSL.ByteString, Int, Int, Int, Int, Int, BSL.ByteString)))
 
-definitions :: IO (Vector (Int, Word8, Word8, Word8, ByteString))
+definitions :: IO (Vector (Int, Word8, Word8, Word8, BS.ByteString))
 definitions = readDefaultMapCSVFile "definitions"
   (Data.Csv.decodeWith ssvOptions Data.Csv.HasHeader ::
-  ByteString -> Either String (Vector (Int, Word8, Word8, Word8, ByteString)))
+  BSL.ByteString -> Either String (Vector (Int, Word8, Word8, Word8, BSC.ByteString)))

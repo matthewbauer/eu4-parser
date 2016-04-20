@@ -3,6 +3,12 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css">
   <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
   <script src="geojson.js"></script>
+  <script src="area.js"></script>
+  <script src="climate.js"></script>
+  <script src="continent.js"></script>
+  <script src="provinces.js"></script>
+  <script src="region.js"></script>
+  <script src="superregion.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -51,7 +57,44 @@
         };
       },
       onEachFeature: function(feature, layer) {
-        layer.bindPopup(feature.properties.name);
+        var provinceData = "<h1>" + feature.properties.name + "</h2>";
+        if (area[feature.id])
+          provinceData += "<p>" + "area: " + area[feature.id] + "</p>";
+        if (climate[feature.id])
+          provinceData += "<p>" + "climate: " + climate[feature.id] + "</p>";
+        if (continent[feature.id])
+          provinceData += "<p>" + "continent: " + continent[feature.id] + "</p>";
+        if (region[area[feature.id]])
+          provinceData += "<p>" + "region: " + region[area[feature.id]] + "</p>";
+        if (superregion[region[area[feature.id]]])
+          provinceData += "<p>" + "superregion: " + superregion[region[area[feature.id]]] + "</p>";
+        if (provinces[feature.id]) {
+          if (provinces[feature.id].add_core)
+            provinceData += "<p>" + "core: " + provinces[feature.id].add_core + "</p>";
+          if (provinces[feature.id].base_manpower)
+            provinceData += "<p>" + "base_manpower: " + provinces[feature.id].base_manpower + "</p>";
+          if (provinces[feature.id].base_production)
+            provinceData += "<p>" + "base_production: " + provinces[feature.id].base_production + "</p>";
+          if (provinces[feature.id].capital)
+            provinceData += "<p>" + "capital: " + provinces[feature.id].capital + "</p>";
+          if (provinces[feature.id].culture)
+            provinceData += "<p>" + "culture: " + provinces[feature.id].culture + "</p>";
+          if (provinces[feature.id].controller)
+            provinceData += "<p>" + "controller: " + provinces[feature.id].controller + "</p>";
+          if (provinces[feature.id].discovered_by)
+            provinceData += "<p>" + "discovered_by: " + provinces[feature.id].discovered_by + "</p>";
+          if (provinces[feature.id].hre !== undefined)
+            provinceData += "<p>" + "hre: " + provinces[feature.id].hre + "</p>"
+          if (provinces[feature.id].religion)
+            provinceData += "<p>" + "religion: " + provinces[feature.id].religion + "</p>";
+          if (provinces[feature.id].owner)
+            provinceData += "<p>" + "owner: " + provinces[feature.id].owner + "</p>";
+          if (provinces[feature.id].trade_goods)
+            provinceData += "<p>" + "trade_goods: " + provinces[feature.id].trade_goods + "</p>";
+        }
+        layer.bindPopup(
+          provinceData
+        );
       }
     }).addTo(map);
   </script>
