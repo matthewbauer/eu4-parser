@@ -18,10 +18,10 @@ data Value = String String
            | Undefined
            deriving Show
 
-parser :: ParsecT [Char] u Identity [Value]
+parser :: ParsecT String u Identity [Value]
 parser = many $ try value
 
-decode :: SourceName -> [Char] -> Either ParseError [Value]
+decode :: SourceName -> String -> Either ParseError [Value]
 decode = parse parser
 
 value :: GenParser Char st Value
@@ -31,34 +31,34 @@ value = do
   spaces
   return v
 
-date :: ParsecT [Char] u Identity Value
+date :: ParsecT String u Identity Value
 date = do
   a <- digit `manyTill` try (char '.')
   b <- digit `manyTill` try (char '.')
   c <- many digit
   return $ Date (read a :: Integer) (read b :: Integer) (read c :: Integer)
 
-identifier :: ParsecT [Char] u Identity Value
+identifier :: ParsecT String u Identity Value
 identifier = do
   a <- many1 $ alphaNum <|> char '_'
   return $ Identifier a
 
-float :: ParsecT [Char] u Identity Value
+float :: ParsecT String u Identity Value
 float = do
   n <- many1 $ digit <|> char '.' <|> char '-'
   return $ Float (read n :: Float)
 
-bool :: ParsecT [Char] u Identity Value
+bool :: ParsecT String u Identity Value
 bool = fmap Bool $ (try (string "yes") >> return True) <|>
   (try (string "no") >> return False)
 
-string' :: ParsecT [Char] u Identity Value
+string' :: ParsecT String u Identity Value
 string' = do
   _ <- char '"'
   s' <- anyChar `manyTill` try (char '"')
   return $ String s'
 
-list :: ParsecT [Char] u Identity Value
+list :: ParsecT String u Identity Value
 list = do
   _ <- char '{'
   spaces
@@ -67,7 +67,7 @@ list = do
   _ <- char '}'
   return $ List r
 
-assignment :: ParsecT [Char] u Identity Value
+assignment :: ParsecT String u Identity Value
 assignment = do
   i <- identifier
   spaces
@@ -76,7 +76,7 @@ assignment = do
   n <- value
   return $ Assignment (s i) n
 
-comment :: ParsecT [Char] u Identity Value
+comment :: ParsecT String u Identity Value
 comment = do
   _ <- char '#'
   _ <- anyChar `manyTill` try endOfLine

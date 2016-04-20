@@ -31,25 +31,25 @@ lookup' k (x:xs) = case x of
 lookupDefaultMap :: String -> IO ClausewitzText.Value
 lookupDefaultMap k = lookup' k <$> defaultMap
 
-map_path :: String -> String
-map_path = ("map/"++)
+mapPath :: String -> String
+mapPath = ("map/"++)
 
 readDefaultMapAttributeFile :: String -> IO [ClausewitzText.Value]
 readDefaultMapAttributeFile k = do
   ClausewitzText.String v <- lookupDefaultMap k
-  readAndParse $ map_path v
+  readAndParse $ mapPath v
 
 readDefaultMapCSVFile :: String -> (ByteString -> Either t b) -> IO b
 readDefaultMapCSVFile k d = do
   ClausewitzText.String k' <- lookupDefaultMap k
-  b <- Data.ByteString.Lazy.readFile $ map_path k'
+  b <- Data.ByteString.Lazy.readFile $ mapPath k'
   let Right v = d b
   return v
 
 readDefaultMapBMPFile :: String -> IO BMP
 readDefaultMapBMPFile k = do
   ClausewitzText.String v <- lookupDefaultMap k
-  Right bmp <- readBMP $ map_path v
+  Right bmp <- readBMP $ mapPath v
   return bmp
 
 pixel' :: Data.ByteString.Internal.ByteString -> (Int, Int) -> (Int, Int) -> [Word8]
@@ -59,7 +59,7 @@ pixel' p (w, h) (x, y)
   | x >= w = [0,0,0]
   | y >= h = [0,0,0]
   | otherwise = pixel'' p (y * w + x)
-  where pixel'' s n = map ((index s) . ((n * 4) +)) [0,1,2]
+  where pixel'' s n = map (index s . ((n * 4) +)) [0,1,2]
 
 pixel :: BMP -> (Int, Int) -> [Word8]
 pixel bmp = pixel' (unpackBMPToRGBA32 bmp) (bmpDimensions bmp)
@@ -71,7 +71,7 @@ ssvOptions = Data.Csv.defaultDecodeOptions {
 }
 
 defaultMap :: IO [ClausewitzText.Value]
-defaultMap = readAndParse $ map_path "default.map"
+defaultMap = readAndParse $ mapPath "default.map"
 
 provinces :: IO BMP
 provinces = readDefaultMapBMPFile "provinces"
@@ -101,8 +101,8 @@ seasons = readDefaultMapAttributeFile "seasons"
 superregion :: IO [ClausewitzText.Value]
 superregion = readDefaultMapAttributeFile "superregion"
 
-trade_winds :: IO [ClausewitzText.Value]
-trade_winds = readDefaultMapAttributeFile "trade_winds"
+tradeWinds :: IO [ClausewitzText.Value]
+tradeWinds = readDefaultMapAttributeFile "trade_winds"
 
 width :: IO ClausewitzText.Value
 width = lookupDefaultMap "width"
@@ -110,11 +110,11 @@ width = lookupDefaultMap "width"
 height :: IO ClausewitzText.Value
 height = lookupDefaultMap "height"
 
-sea_starts :: IO ClausewitzText.Value
-sea_starts = lookupDefaultMap "sea_starts"
+seaStarts :: IO ClausewitzText.Value
+seaStarts = lookupDefaultMap "sea_starts"
 
-max_provinces :: IO ClausewitzText.Value
-max_provinces = lookupDefaultMap "max_provinces"
+maxProvinces :: IO ClausewitzText.Value
+maxProvinces = lookupDefaultMap "max_provinces"
 
 lakes :: IO ClausewitzText.Value
 lakes = lookupDefaultMap "only_used_for_random"

@@ -11,8 +11,8 @@ cartProd xs ys = [(x,y) | x <- xs, y <- ys]
 filterPixels :: BMP -> (Word8, Word8, Word8) -> [(Int, Int)]
 filterPixels bmp = filterPixels' (unpackBMPToRGBA32 bmp) $ bmpDimensions bmp
   where
-    filterPixels' s (w, h) (r, g, b) = filter (((==) [r, g, b]) .
-      (pixel' s (w, h))) $ cartProd [0..w-1] [0..h-1]
+    filterPixels' s (w, h) (r, g, b) = filter (([r, g, b] ==) .
+      pixel' s (w, h)) $ cartProd [0..w-1] [0..h-1]
 
 lookupProvince :: (t, Word8, Word8, Word8, t1) -> BMP -> [(Int, Int)]
 lookupProvince (_, r, g, b, _) ps = filterPixels ps (r, g, b)
@@ -29,7 +29,7 @@ isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
   (p (x-1, y+1)) (p (x, y+1)) (p (x+1, y+1))
   where
     isNotMeaningfulPixel' a b c d e f g h i =
-      any ((fmap (e==) [a, b, c, d, f, g, h, i])==) [
+      fmap (e==) [a, b, c, d, f, g, h, i] `elem` [
         [True,  True,  True,
          True,         True,
          True,  True,  True],
@@ -68,7 +68,7 @@ isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
       ]
 
 neighborsDiff :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [Bool]
-neighborsDiff p (x, y) = fmap ((p (x, y))==) $ fmap p (neighbors (x, y))
+neighborsDiff p (x, y) = fmap ((p (x, y) ==) . p) (neighbors (x, y))
 
 nextPoint :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> (t, t1)
 nextPoint p (x, y) = addPoints (x, y) $ followBorders (neighborsDiff p (x, y))
@@ -78,7 +78,7 @@ loopPoints :: (Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [(t, t1)]
 loopPoints p = iterate $ nextPoint p
 
 loopPointsOnce :: (Eq t, Eq t1, Eq a, Num t, Num t1) => ((t, t1) -> a) -> (t, t1) -> [(t, t1)]
-loopPointsOnce p (x, y) = takeWhile (not . ((head points)==)) $ tail points
+loopPointsOnce p (x, y) = takeWhile (head points /=) $ tail points
   where points = loopPoints p (x, y)
 
 followBorders :: (Num t, Num t1) => [Bool] -> (t, t1)
