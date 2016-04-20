@@ -1,3 +1,4 @@
+import Prelude hiding (putStrLn)
 import Map
 import Borders
 import Geojson
@@ -8,7 +9,7 @@ import Data.Vector (toList, Vector)
 import Data.ByteString.Lazy (unpack, ByteString)
 import Codec.BMP
 import qualified Data.Text
-import qualified Data.ByteString.Lazy
+import Data.ByteString.Lazy.Char8 (putStrLn)
 
 usefulPoints :: BMP -> (t, Word8, Word8, Word8, t1) -> [(Int, Int)]
 usefulPoints provinces' = filter
@@ -50,4 +51,4 @@ geojson = do
   return $ FeatureCollection $ feature definitions' provinces'
 
 main :: IO ()
-main = Data.ByteString.Lazy.writeFile "out.json" . encode =<< geojson
+main = putStrLn . encode =<< geojson
