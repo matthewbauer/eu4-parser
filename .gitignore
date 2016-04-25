@@ -12,3 +12,13 @@ tutorial
 dist
 *.hi
 *.o
+generate-area
+generate-climate
+generate-continent
+generate-countries
+generate-geojson
+generate-positions
+generate-provinces
+generate-region
+generate-superregion
+generate-winds
