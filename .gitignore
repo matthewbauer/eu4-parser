@@ -22,3 +22,4 @@ generate-provinces
 generate-region
 generate-superregion
 generate-winds
+*.js
