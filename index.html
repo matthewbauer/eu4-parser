@@ -6,9 +6,13 @@
   <script src="area.js"></script>
   <script src="climate.js"></script>
   <script src="continent.js"></script>
+  <script src="countries.js"></script>
+  <script src="geojson.js"></script>
   <script src="provinces.js"></script>
+  <script src="positions.js"></script>
   <script src="region.js"></script>
   <script src="superregion.js"></script>
+  <script src="winds.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -28,8 +32,16 @@
     var map = L.map('map', {
       crs: L.extend({}, L.CRS, {
         wrapLng: [0, 5632],
-        projection: L.Projection.LonLat,
-        transformation: new L.Transformation(1, 0, -1, 0),
+        projection: {
+        	project: function (latlng) {
+        		return new L.Point(latlng.lng, latlng.lat);
+        	},
+        	unproject: function (point) {
+        		return new L.LatLng(point.y, point.x);
+        	},
+        	bounds: L.bounds([0, 0], [2048, 5632])
+        },
+        transformation: new L.Transformation(1, 5, -1, 5),
         scale: function(zoom) {
           return Math.pow(2, zoom);
         },
@@ -38,25 +50,34 @@
         },
         distance: function(latlng1, latlng2) {
           return Math.sqrt(Math.pow(latlng2.lng - latlng1.lng, 2) +
-                 Math.pow(latlng2.lat - latlng1.lat, 2));
+                           Math.pow(latlng2.lat - latlng1.lat, 2)
+          );
         }
       }),
       minZoom: -2,
-      maxZoom: 1
+      maxZoom: 10
     })
     .fitBounds(new L.LatLngBounds(L.latLng(0,0), L.latLng(2048, 5632)));
     L.geoJson(geojson, {
       style: function(feature) {
+        if (!feature.properties)
+          return {};
         return {
-          fillColor: '#' + feature.properties.color.map(function(i) {
-            return i.toString(16);
-          }).join(''),
-          weight: 1,
+          fillOpacity: 1,
+          opacity: 1,
+          weight: 2,
           dashArray: '3',
-          fillOpacity: 1.0
+          fillColor: '#' + feature.properties.color.map(function(i) {
+            var x = i.toString(16);
+            for (var i = 0; i < 2 - x.length; i++)
+              x = "0" + x;
+            return x;
+          }).join('')
         };
       },
       onEachFeature: function(feature, layer) {
+        if (!feature.properties)
+          return;
         var provinceData = "<h1>" + feature.properties.name + "</h2>";
         if (area[feature.id])
           provinceData += "<p>" + "area: " + area[feature.id] + "</p>";
@@ -66,11 +87,20 @@
           provinceData += "<p>" + "continent: " + continent[feature.id] + "</p>";
         if (region[area[feature.id]])
           provinceData += "<p>" + "region: " + region[area[feature.id]] + "</p>";
+        if (winds[feature.id])
+          provinceData += "<p>" + "wind: " + winds[feature.id] + "</p>";
         if (superregion[region[area[feature.id]]])
           provinceData += "<p>" + "superregion: " + superregion[region[area[feature.id]]] + "</p>";
         if (provinces[feature.id]) {
-          if (provinces[feature.id].add_core)
+          if (provinces[feature.id].add_core) {
             provinceData += "<p>" + "core: " + provinces[feature.id].add_core + "</p>";
+          }
+          if (provinces[feature.id].controller) {
+            provinceData += "<p>" + "controller: " + provinces[feature.id].controller + "</p>";
+          }
+          if (provinces[feature.id].owner) {
+            provinceData += "<p>" + "owner: " + provinces[feature.id].owner + "</p>";
+          }
           if (provinces[feature.id].base_manpower)
             provinceData += "<p>" + "base_manpower: " + provinces[feature.id].base_manpower + "</p>";
           if (provinces[feature.id].base_production)
@@ -79,22 +109,16 @@
             provinceData += "<p>" + "capital: " + provinces[feature.id].capital + "</p>";
           if (provinces[feature.id].culture)
             provinceData += "<p>" + "culture: " + provinces[feature.id].culture + "</p>";
-          if (provinces[feature.id].controller)
-            provinceData += "<p>" + "controller: " + provinces[feature.id].controller + "</p>";
           if (provinces[feature.id].discovered_by)
             provinceData += "<p>" + "discovered_by: " + provinces[feature.id].discovered_by + "</p>";
           if (provinces[feature.id].hre !== undefined)
             provinceData += "<p>" + "hre: " + provinces[feature.id].hre + "</p>"
           if (provinces[feature.id].religion)
             provinceData += "<p>" + "religion: " + provinces[feature.id].religion + "</p>";
-          if (provinces[feature.id].owner)
-            provinceData += "<p>" + "owner: " + provinces[feature.id].owner + "</p>";
           if (provinces[feature.id].trade_goods)
             provinceData += "<p>" + "trade_goods: " + provinces[feature.id].trade_goods + "</p>";
         }
-        layer.bindPopup(
-          provinceData
-        );
+        layer.bindPopup(provinceData);
       }
     }).addTo(map);
   </script>

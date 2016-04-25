@@ -2,8 +2,10 @@
 module ClausewitzText where
 
 import Text.Parsec
-import Text.Parsec.String
-
+-- import Text.ParserCombinators.Parsec
+import Text.Parsec.Text
+-- import Text.Parsec.Char
+import Data.Text
 import Data.Functor.Identity (Identity)
 
 -- underlying value piece in all text files
@@ -18,47 +20,47 @@ data Value = String String
            | Undefined
            deriving Show
 
-parser :: ParsecT String u Identity [Value]
+parser :: Parser [Value]
 parser = many $ try value
 
-decode :: SourceName -> String -> Either ParseError [Value]
+decode :: SourceName -> Text -> Either ParseError [Value]
 decode = parse parser
 
-value :: GenParser Char st Value
+value :: ParsecT Text u Identity Value
 value = do
   v <- try list <|> try string' <|> try date <|> try bool <|> try assignment <|>
        try float <|> try comment <|> try identifier
   spaces
   return v
 
-date :: ParsecT String u Identity Value
+date :: ParsecT Text u Identity Value
 date = do
   a <- digit `manyTill` try (char '.')
   b <- digit `manyTill` try (char '.')
   c <- many digit
   return $ Date (read a :: Integer) (read b :: Integer) (read c :: Integer)
 
-identifier :: ParsecT String u Identity Value
+identifier :: ParsecT Text u Identity Value
 identifier = do
   a <- many1 $ alphaNum <|> char '_'
   return $ Identifier a
 
-float :: ParsecT String u Identity Value
+float :: ParsecT Text u Identity Value
 float = do
   n <- many1 $ digit <|> char '.' <|> char '-'
   return $ Float (read n :: Float)
 
-bool :: ParsecT String u Identity Value
+bool :: ParsecT Text u Identity Value
 bool = fmap Bool $ (try (string "yes") >> return True) <|>
   (try (string "no") >> return False)
 
-string' :: ParsecT String u Identity Value
+string' :: ParsecT Text u Identity Value
 string' = do
   _ <- char '"'
   s' <- anyChar `manyTill` try (char '"')
   return $ String s'
 
-list :: ParsecT String u Identity Value
+list :: ParsecT Text u Identity Value
 list = do
   _ <- char '{'
   spaces
@@ -67,7 +69,7 @@ list = do
   _ <- char '}'
   return $ List r
 
-assignment :: ParsecT String u Identity Value
+assignment :: ParsecT Text u Identity Value
 assignment = do
   i <- identifier
   spaces
@@ -76,7 +78,7 @@ assignment = do
   n <- value
   return $ Assignment (s i) n
 
-comment :: ParsecT String u Identity Value
+comment :: ParsecT Text u Identity Value
 comment = do
   _ <- char '#'
   _ <- anyChar `manyTill` try endOfLine

@@ -5,10 +5,12 @@ import System.Directory
 import Data.Map hiding (foldr, null)
 import Data.Char
 import Map
+import Generator
 import Data.ByteString.Lazy.Char8 (putStrLn)
+import Data.ByteString.Char8 (readInt)
 import Data.Text hiding (empty, takeWhile, singleton, foldr, null)
 import Data.Vector hiding (empty, singleton, (++), takeWhile, (!), foldr, null)
-import qualified Data.HashMap.Lazy
+import qualified Data.ByteString.Char8 as BS
 
 provinceHistories :: IO [FilePath]
 provinceHistories = getDirectoryContents "history/provinces"
@@ -28,37 +30,25 @@ readCountryHistoryFile :: Int -> IO [ClausewitzText.Value]
 readCountryHistoryFile n = do
   provinceHistoryPath' <- provincePathMap <$> provinceHistories
   if n `member` provinceHistoryPath'
-    then readAndParse ("history/provinces/" ++ provinceHistoryPath' ! n)
+    then readAndParse
+      ("history/provinces/" `mappend` (provinceHistoryPath' ! n))
   else return []
 
-toMap :: [ClausewitzText.Value] -> Map Text Value
-toMap = foldr (union . toMap') empty
-
-toMap' :: ClausewitzText.Value -> Map Text Value
-toMap' (ClausewitzText.Assignment a b) = singleton (pack a) (toMap'' b)
-toMap' _ = empty
-
-toMap'' :: ClausewitzText.Value -> Value
-toMap'' (ClausewitzText.Identifier s) = String (pack s)
-toMap'' (ClausewitzText.Float f) = Number (fromRational (toRational f))
-toMap'' (ClausewitzText.Bool b) = Bool b
-toMap'' (ClausewitzText.String s) = String (pack s)
-toMap'' (ClausewitzText.List s) = Object (Data.HashMap.Lazy.fromList (Data.Map.toList (toMap s)))
-toMap'' _ = Null
-
-definitionsToMap :: [(Int, t, t1, t2, t3)] -> IO (Map Text (Map Text Value))
+definitionsToMap :: [Vector BS.ByteString] -> IO (Map Text (Map Text Value))
 definitionsToMap (x:xs) = do
-  m <- definitionsToMap' x
+  m <- definitionsToMap' (Data.Vector.toList x)
   m' <- definitionsToMap xs
   return $ m `union` m'
+  where
+    definitionsToMap' :: [BS.ByteString] -> IO (Map Text (Map Text Value))
+    definitionsToMap' (a:_) = do
+      let Just (n', _) = readInt a
+      file <- readCountryHistoryFile n'
+      if null file
+        then return empty
+        else return $ singleton (pack (show n')) (toMap file)
+    definitionsToMap' [] = return empty
 definitionsToMap [] = return empty
-
-definitionsToMap' :: (Int, t, t1, t2, t3) -> IO (Map Text (Map Text Value))
-definitionsToMap' (n, _, _, _, _) = do
-  file <- readCountryHistoryFile n
-  if null file
-    then return empty
-    else return $ singleton (pack (show n)) (toMap file)
 
 main :: IO ()
 main = putStrLn . encode =<< definitionsToMap =<< (Data.Vector.toList <$> definitions)

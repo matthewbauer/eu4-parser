@@ -2,6 +2,7 @@
 module Geojson where
 
 import Data.Aeson
+import Data.Vector
 
 type Position = [Double]
 
@@ -13,7 +14,7 @@ data Geometry = Point Position
               | MultiPolygon [[[Position]]]
 data GeometryCollection = GeometryCollection [Geometry]
 data Feature = Feature GeometryCollection String Value
-data FeatureCollection = FeatureCollection [Feature]
+data FeatureCollection = FeatureCollection (Vector Feature)
 
 instance ToJSON Geometry where
   toJSON (Point p) = object [

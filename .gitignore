@@ -8,3 +8,7 @@ map
 missions
 localisation
 leaflet.css
+tutorial
+dist
+*.hi
+*.o

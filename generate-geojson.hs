@@ -1,54 +1,67 @@
+{-# LANGUAGE OverloadedStrings #-}
 import Prelude hiding (putStrLn)
 import Map
 import Borders
 import Geojson
 import Data.Aeson
-import Data.Char
-import Data.Word
-import Data.Vector (toList, Vector)
-import Data.ByteString.Lazy (unpack, ByteString)
+import qualified Data.Vector as Vector
 import Codec.BMP
-import qualified Data.Text
+import qualified Data.ByteString.Char8 as BSC
 import Data.ByteString.Lazy.Char8 (putStrLn)
+import Data.Text.ICU.Convert
+import Data.Map ((!))
 
-usefulPoints :: BMP -> (t, Word8, Word8, Word8, t1) -> [(Int, Int)]
-usefulPoints provinces' = filter
-  (not . isNotMeaningfulPixel (pixel provinces')) .
-  findPoints provinces'
+findPoints xs ps p = case rgb p of
+      (Just (r, _), Just (g, _), Just (b, _)) ->
+        if null pixels
+          then []
+          else [loopPointsOnce (pixel ps) (head pixels)]
+          where
+            pixels = goodPixels $ xs ! (fromIntegral r, fromIntegral g, fromIntegral b)
+      _ -> []
+  where
+    rgb (_:b:c:d:_) = (BSC.readInt b, BSC.readInt c, BSC.readInt d)
+    rgb _ = (Nothing, Nothing, Nothing)
+    goodPixels = filter (not . isNotMeaningfulPixel (pixel ps))
+    -- findPoints' = foldr (loopPoints (pixel ps))
+    -- findPoints' (x:xs') = points : findPoints' (xs' \\ points)
+    --   where points = loopPointsOnce (pixel ps) x
+    -- findPoints' [] = []
 
-findPoints :: BMP -> (t, Word8, Word8, Word8, t1) -> [(Int, Int)]
-findPoints ps p = if null startPoints
-    then []
-    else loopPointsOnce (pixel ps) $ head startPoints
-  where startPoints = lookupProvince p ps
+provinceFeature :: Converter -> ([BSC.ByteString], [[Position]]) -> Feature
+provinceFeature conv ([i',r',g',b',name',_], points) = provinceFeature'
+  (BSC.readInt i', BSC.readInt r', BSC.readInt g', BSC.readInt b', toUnicode conv name')
+  where
+    provinceFeature' (Just (i,_), Just (r,_), Just (g,_), Just (b,_), name) =
+      provinceFeature'' (i, r, g, b, name)
+    provinceFeature' _ = Feature (GeometryCollection []) "" Null
+    provinceFeature'' (i, r, g, b, name) = Feature
+      (GeometryCollection (fmap pointPolygon points))
+      (show i)
+      (object [
+        "name" .= name,
+        "color" .= [r, g, b]
+      ])
+    pointPolygon :: [Position] -> Geometry
+    pointPolygon points' = Polygon [points' `mappend` [head points']]
+provinceFeature _ _ = Feature (GeometryCollection []) "" Null
 
-provincePoints :: Num t => BMP -> (t1, Word8, Word8, Word8, t2) -> ((t1, Word8, Word8, Word8, t2), [[t]])
-provincePoints provinces' definition =
-    (definition, take 500 (fmap toPoint (usefulPoints provinces' definition)))
-  where toPoint (x,y) = [fromIntegral x, fromIntegral y]
-
-isGoodProvince :: Foldable t1 => (t, t1 a) -> Bool
-isGoodProvince (_, points) = (length points < 500) && not (null points)
-
-provinceFeature :: (Show a, ToJSON t) => ((a, t, t, t, ByteString), [Position]) -> Feature
-provinceFeature ((i,r,g,b,name), points) = Feature
-  (GeometryCollection [Polygon [points ++ [head points]]])
-  ("province" ++ show i)
-  (object [
-    Data.Text.pack "name" .= tostr name,
-    Data.Text.pack "color" .= [r, g, b]
-  ])
-  where tostr = String . Data.Text.pack . map (chr . fromIntegral) . unpack
-
-feature :: Show a => Vector (a, Word8, Word8, Word8, ByteString) -> BMP -> [Feature]
-feature definitions' provinces' = fmap provinceFeature $
-  filter isGoodProvince $ fmap (provincePoints provinces') (toList definitions')
+feature xs provinces' conv = Vector.map
+  (provinceFeature conv . provincePoints . Vector.toList)
+  where
+    provincePoints definition = (definition, toPoints (findPoints xs provinces' definition))
+    toPoint (x,y) = [fromIntegral x, fromIntegral y]
+    toPoints = fmap (fmap toPoint)
 
 geojson :: IO FeatureCollection
 geojson = do
   definitions' <- definitions
   provinces' <- provinces
-  return $ FeatureCollection $ feature definitions' provinces'
+  let rgba = unpackBMPToRGBA32 provinces'
+  let dims = bmpDimensions provinces'
+  let xs = filterAllPixels (rgba, dims)
+  conv <- open "cp1252" Nothing
+  return . FeatureCollection $! feature xs (rgba, dims) conv definitions'
 
 main :: IO ()
 main = putStrLn . encode =<< geojson
