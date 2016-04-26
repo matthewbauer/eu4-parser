@@ -18,6 +18,9 @@ historyDir = "history/countries/"
 countryId :: String -> String
 countryId = takeWhile isAlpha
 
+countryName :: String -> String
+countryName = takeWhile isAlpha . drop 5
+
 countryPath :: String -> String
 countryPath = (++) historyDir
 
@@ -40,7 +43,7 @@ countryMap [] = return empty
 countries :: IO (Map String Value)
 countries = do
   c <- countryHistories
-  countryMap (Prelude.filter (not . skip) c)
+  countryMap $ Prelude.filter (not . skip) c
 
 main :: IO ()
 main = putStrLn . encode =<< countries

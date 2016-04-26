@@ -8,7 +8,7 @@ import qualified Data.HashMap.Lazy
 import Data.Foldable
 
 toMapO :: [ClausewitzText.Value] -> Value
-toMapO s = Object (Data.HashMap.Lazy.fromList (Data.Map.toList (toMap s)))
+toMapO s = Object $ Data.HashMap.Lazy.fromList (Data.Map.toList (toMap s))
 
 toMap :: [ClausewitzText.Value] -> Map Text Value
 toMap = foldr' (union . toMap') empty

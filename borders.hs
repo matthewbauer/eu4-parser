@@ -102,7 +102,23 @@ isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
 
         [False, True, True,
          True,        True,
-         True,  True, False]
+         True,  True, False],
+
+        [True, True,  False,
+         True,        True,
+         False, True, False],
+        [False, True, True,
+         True,        True,
+         False, True, False],
+        [False, True, False,
+         True,        True,
+         True,  True, False],
+        [False, True, False,
+         True,        True,
+         False, True, True],
+        [False, True, False,
+         True,        True,
+         False, True, False]
       ]
 
 loopPointsOnce :: ((Int, Int) -> (Word8, Word8, Word8)) -> (Int, Int) -> [(Int, Int)]

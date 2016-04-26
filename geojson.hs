@@ -12,8 +12,9 @@ data Geometry = Point Position
               | MultiLineString [Position]
               | Polygon [[Position]]
               | MultiPolygon [[[Position]]]
-data GeometryCollection = GeometryCollection [Geometry]
-data Feature = Feature GeometryCollection String Value
+   deriving (Eq)
+data GeometryCollection = GeometryCollection [Geometry] deriving (Eq)
+data Feature = Feature GeometryCollection String Value deriving (Eq)
 data FeatureCollection = FeatureCollection (Vector Feature)
 
 instance ToJSON Geometry where
