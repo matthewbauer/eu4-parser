@@ -28,8 +28,8 @@ decode = parse parser
 
 value :: ParsecT Text u Identity Value
 value = do
-  v <- try list <|> try string' <|> try date <|> try bool <|> try assignment <|>
-       try float <|> try comment <|> try identifier
+  v <- try list <|> try string' <|> try bool <|> try assignment <|>
+       try date <|> try float <|> try comment <|> try identifier
   spaces
   return v
 
@@ -42,7 +42,7 @@ date = do
 
 identifier :: ParsecT Text u Identity Value
 identifier = do
-  a <- many1 $ alphaNum <|> char '_'
+  a <- many1 $ alphaNum <|> char '_' <|> char '.'
   return $ Identifier a
 
 float :: ParsecT Text u Identity Value
