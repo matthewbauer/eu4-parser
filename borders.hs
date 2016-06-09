@@ -102,34 +102,19 @@ isNotMeaningfulPixel p (x, y) = isNotMeaningfulPixel'
 
         [False, True, True,
          True,        True,
-         True,  True, False],
-
-        [True, True,  False,
-         True,        True,
-         False, True, False],
-        [False, True, True,
-         True,        True,
-         False, True, False],
-        [False, True, False,
-         True,        True,
-         True,  True, False],
-        [False, True, False,
-         True,        True,
-         False, True, True],
-        [False, True, False,
-         True,        True,
-         False, True, False]
+         True,  True, False]
       ]
 
 loopPointsOnce :: ((Int, Int) -> (Word8, Word8, Word8)) -> (Int, Int) -> [(Int, Int)]
 loopPointsOnce p (x, y) = takeWhile (head points /=) $ tail points
   where points = fst Prelude.<$> loopPoints ((x, y), (-1,-1))
-        loopPoints = iterate $ nextPoint p
+        loopPoints = iterate $ nextPoint p 0
 
-nextPoint :: ((Int, Int) -> (Word8, Word8, Word8)) -> ((Int, Int), (Int, Int)) -> ((Int, Int), (Int, Int))
-nextPoint p ((x, y), (a, b))
+nextPoint :: ((Int, Int) -> (Word8, Word8, Word8)) -> Int -> ((Int, Int), (Int, Int)) -> ((Int, Int), (Int, Int))
+nextPoint p n ((x, y), (a, b))
   | p (x+a, y+b) == p (x, y) = ((x+a, y+b), counterclockwise (counterclockwise (a, b)))
-  | otherwise = nextPoint p ((x, y), clockwise (a, b))
+  | n == 9 = ((x,y),(a,b))
+  | otherwise = nextPoint p (n+1) ((x, y), clockwise (a, b))
   where
     clockwise :: (Int, Int) -> (Int, Int)
     clockwise (1, 0) = (1, -1)
