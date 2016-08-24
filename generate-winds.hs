@@ -1,3 +1,5 @@
+-- generate a map of features to "winds" from the parsed assets
+
 import Prelude hiding (putStrLn)
 import Data.Aeson
 import Data.ByteString.Lazy.Char8 (putStrLn)
