@@ -6,6 +6,10 @@ This project parses assets for the "Clausewitz" game engine used by the popular 
 - Parses other assets used by the Clausewitz engine into a more generic JSON text format. See ```clausewitztext.hs```, ```generate-area.hs```, ```generate-climate.hs```, ```generate-countries.hs```, ```generate-positions.hs```, ```generate-provinces.hs```, ```generate-region.hs```, ```generate-superregion.hs```, ```generate-winds.hs```, and ```generator.hs``` for more info.
 - Provides a frontend to make sense of the above JSON files. Each of the geojson features are projected onto the world map. Each feature has some data associated with it like "capital" or "base_manpower". See ```index.html``` for more info.
 
+## Live demo
+
+A live demo is available at https://matthewbauer.us/eu4-parser/.
+
 ## Building
 
 ```sh
