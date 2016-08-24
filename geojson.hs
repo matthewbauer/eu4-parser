@@ -1,4 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-|
+Module      : Geojson
+Description : Data types for Geojson data using Aeson.
+Copyright   : (c) Matthew Bauer, 2016
+Maintainer  : mjbauer95@gmail.com
+Stability   : experimental
+
+These are some data types used in the geojson standard
+that is defined in RFC7946 available at
+https://tools.ietf.org/html/rfc7946.
+-}
 module Geojson where
 
 import Data.Aeson
