@@ -1,3 +1,14 @@
+{-|
+Module      : Generator
+Description : Helpful functions for generating JSON from Clausewitz values
+Copyright   : (c) Matthew Bauer, 2016
+Maintainer  : mjbauer95@gmail.com
+Stability   : experimental
+
+Generate JSON data from parsed values within Clausewitz text
+assets. These provide commonly used methods for creating
+meaningful data from parsed values.
+-}
 module Generator where
 
 import qualified ClausewitzText
