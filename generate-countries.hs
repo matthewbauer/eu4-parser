@@ -1,3 +1,5 @@
+-- generate a map of features to "countries" from the parsed assets
+
 import Prelude hiding (putStrLn)
 import Data.Aeson
 import System.Directory
