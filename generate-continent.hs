@@ -1,3 +1,5 @@
+-- generate a map of features to "continent" from the parsed assets
+
 import Prelude hiding (putStrLn)
 import Map
 import Generator
