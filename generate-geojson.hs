@@ -1,3 +1,5 @@
+-- generate geojson data from "default.map" and "definitions.csv"
+
 {-# LANGUAGE OverloadedStrings #-}
 import Prelude hiding (putStrLn)
 import Map
