@@ -1,0 +1,191 @@
+name:                eu4-parser
+version:             0.1.0.0
+synopsis:            This project parses assets for the "Clausewitz" game engine used by the popular games "Europa Universalis IV" and "Crusader Kings II"
+-- description:
+license:             GPL-3
+license-file:        LICENSE
+author:              Matthew Bauer
+maintainer:          mjbauer95@gmail.com
+-- copyright:
+-- category:
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+executable generate-geojson
+  main-is:             generate-geojson.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers
+  other-modules:
+               Borders,
+               ClausewitzText,
+               Geojson,
+               Map
+  default-language:    Haskell2010
+
+
+executable generate-area
+  main-is:             generate-area.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+executable generate-countries
+  main-is:             generate-countries.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers,
+                directory
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+executable generate-climate
+  main-is:             generate-climate.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+executable generate-positions
+  main-is:             generate-positions.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+executable generate-provinces
+  main-is:             generate-provinces.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers,
+                directory
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+
+executable generate-superregion
+  main-is:             generate-superregion.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
+
+executable generate-winds
+  main-is:             generate-winds.hs
+  build-depends:
+                base >=4.9 && <4.10,
+                aeson >= 1.0 && <1.2,
+                vector,
+                parsec,
+                text,
+                bytestring,
+                bmp,
+                cassava,
+                text-icu,
+                containers,
+                unordered-containers
+  other-modules:
+                Borders,
+                ClausewitzText,
+                Geojson,
+                Map,
+                Generator
+  default-language:    Haskell2010
