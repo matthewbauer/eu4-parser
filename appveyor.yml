@@ -7,7 +7,7 @@ before_test:
 - curl -sS -ostack.zip -L --insecure http://www.stackage.org/stack/windows-i386
 - 7z x stack.zip stack.exe
 
-- pacman --noconfirm -S mingw-w64-x86_64-icu
+- C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S mingw-w64-i386-icu" 
 
 clone_folder: "c:\\stack"
 environment:
