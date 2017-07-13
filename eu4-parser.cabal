@@ -1,16 +1,19 @@
 name:                eu4-parser
 version:             0.1.0.0
-synopsis:            This project parses assets for the "Clausewitz" game engine used by the popular games "Europa Universalis IV" and "Crusader Kings II"
--- description:
+synopsis:            "Clausewitz" game engine parser
+description:         This project parses assets for the "Clausewitz" game engine used by the popular games "Europa Universalis IV" and "Crusader Kings II".
 license:             GPL-3
 license-file:        LICENSE
 author:              Matthew Bauer
 maintainer:          mjbauer95@gmail.com
 -- copyright:
--- category:
+category:            Parser
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+source-repository head
+  type:     git
+  location: git://github.com/matthewbauer/eu4-parser.git
 
 executable generate-geojson
   main-is:             generate-geojson.hs
